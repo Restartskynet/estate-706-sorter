@@ -1,7 +1,7 @@
 import { countTermOccurrences, normalizeText } from './normalize';
-import { FILENAME_RULES, type ScheduleDefinition, type ScheduleId, SCHEDULES } from './schedules';
+import type { CompiledScheduleConfig } from './scheduleConfig';
+import type { ScheduleDefinition, ScheduleId } from './schedules';
 
-export const MIN_TEXT_CHARS = 250;
 export const SCORE_FLOOR = 18;
 export const LOW_CONFIDENCE_MARGIN = 6;
 
@@ -16,12 +16,19 @@ export interface ClassificationResult {
   scores: Record<ScheduleId, number>;
 }
 
-const schedulesById = new Map<ScheduleId, ScheduleDefinition>(
-  SCHEDULES.map((schedule) => [schedule.id, schedule])
-);
+export interface PdfScanMetrics {
+  chars: number;
+  textItems: number;
+  pagesSampled: number;
+}
 
-export function applyFilenameRules(filename: string): ScheduleId | null {
-  for (const rule of FILENAME_RULES) {
+export interface ScannedDetectionThresholds {
+  minChars: number;
+  minTextItems: number;
+}
+
+export function applyFilenameRules(filename: string, config: CompiledScheduleConfig): ScheduleId | null {
+  for (const rule of config.filenameRules) {
     if (rule.pattern.test(filename)) {
       return rule.schedule;
     }
@@ -44,13 +51,16 @@ export function classifyDocument(options: {
   filename: string;
   text: string;
   isPdf: boolean;
+  config: CompiledScheduleConfig;
+  pdfMetrics?: PdfScanMetrics;
+  scannedThresholds: ScannedDetectionThresholds;
 }): ClassificationResult {
   const normalizedFilename = normalizeText(options.filename);
-  const filenameMatch = applyFilenameRules(normalizedFilename);
+  const filenameMatch = applyFilenameRules(normalizedFilename, options.config);
   const scores = {} as Record<ScheduleId, number>;
 
   if (filenameMatch) {
-    for (const schedule of SCHEDULES) {
+    for (const schedule of options.config.schedules) {
       scores[schedule.id] = schedule.id === filenameMatch ? SCORE_FLOOR : 0;
     }
     return {
@@ -62,21 +72,25 @@ export function classifyDocument(options: {
     };
   }
 
-  if (options.isPdf && options.text.trim().length < MIN_TEXT_CHARS) {
-    for (const schedule of SCHEDULES) {
-      scores[schedule.id] = 0;
+  if (options.isPdf && options.pdfMetrics && options.pdfMetrics.pagesSampled > 0) {
+    const lowChars = options.pdfMetrics.chars < options.scannedThresholds.minChars;
+    const lowItems = options.pdfMetrics.textItems < options.scannedThresholds.minTextItems;
+    if (lowChars || lowItems) {
+      for (const schedule of options.config.schedules) {
+        scores[schedule.id] = 0;
+      }
+      return {
+        decision: 'review',
+        candidate: 'Unknown',
+        reason: `likely_scanned_pdf: low_text_layer (chars=${options.pdfMetrics.chars}, textItems=${options.pdfMetrics.textItems}, sampled=${options.pdfMetrics.pagesSampled})`,
+        score: 0,
+        scores,
+      };
     }
-    return {
-      decision: 'review',
-      candidate: 'Unknown',
-      reason: 'pdf_text_too_small (likely scanned; needs OCR)',
-      score: 0,
-      scores,
-    };
   }
 
   if (!options.text.trim()) {
-    for (const schedule of SCHEDULES) {
+    for (const schedule of options.config.schedules) {
       scores[schedule.id] = 0;
     }
     return {
@@ -88,7 +102,7 @@ export function classifyDocument(options: {
     };
   }
 
-  for (const schedule of SCHEDULES) {
+  for (const schedule of options.config.schedules) {
     scores[schedule.id] = scoreSchedule(options.text, schedule);
   }
 
@@ -114,8 +128,4 @@ export function classifyDocument(options: {
     score: bestScore,
     scores,
   };
-}
-
-export function getScheduleLabel(scheduleId: ScheduleId): string {
-  return schedulesById.get(scheduleId)?.label ?? scheduleId;
 }
