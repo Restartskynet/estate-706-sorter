@@ -1,0 +1,36 @@
+[
+  {
+    "filename": "Estate_Property_Deed.pdf",
+    "text": "Real estate property deed mortgage for 123 Main Street.",
+    "isPdf": true,
+    "expectedDecision": "assigned",
+    "expectedSchedule": "A_Real_Estate"
+  },
+  {
+    "filename": "Brokerage_Statement.pdf",
+    "text": "Brokerage statement for stock and bond holdings.",
+    "isPdf": true,
+    "expectedDecision": "assigned",
+    "expectedSchedule": "B_Stocks_Bonds"
+  },
+  {
+    "filename": "Checking_Statement.pdf",
+    "text": "Bank statement for checking account and savings account activity.",
+    "isPdf": true,
+    "expectedDecision": "assigned",
+    "expectedSchedule": "C_Cash_Notes"
+  },
+  {
+    "filename": "LifePolicy.pdf",
+    "text": "Life insurance policy beneficiary designation and premium notice.",
+    "isPdf": true,
+    "expectedDecision": "assigned",
+    "expectedSchedule": "D_Life_Insurance"
+  },
+  {
+    "filename": "Miscellaneous.txt",
+    "text": "This document does not match any configured schedule terms.",
+    "isPdf": false,
+    "expectedDecision": "review"
+  }
+]

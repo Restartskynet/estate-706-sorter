@@ -1,28 +1,59 @@
-import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist';
-import workerSrc from 'pdfjs-dist/build/pdf.worker.min?url';
+// src/pdfText.ts
+// Extract embedded text from a PDF (no OCR).
+// Uses pdfjs "legacy" build for better compatibility in Vite/StackBlitz/WebContainer.
 
-GlobalWorkerOptions.workerSrc = workerSrc;
+import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
+import workerSrc from "pdfjs-dist/legacy/build/pdf.worker.min.mjs?url";
 
-export const MAX_PAGES_TEXT = 6;
-export const STOP_AFTER_CHARS = 5000;
+(pdfjs as any).GlobalWorkerOptions.workerSrc = workerSrc;
 
-export async function extractPdfText(buffer: ArrayBuffer): Promise<string> {
-  const loadingTask = getDocument({ data: buffer });
-  const pdf = await loadingTask.promise;
-  const pageCount = Math.min(pdf.numPages, MAX_PAGES_TEXT);
-  let text = '';
+function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms);
+    p.then(
+      (v) => {
+        clearTimeout(t);
+        resolve(v);
+      },
+      (err) => {
+        clearTimeout(t);
+        reject(err);
+      }
+    );
+  });
+}
 
-  for (let pageNum = 1; pageNum <= pageCount; pageNum += 1) {
-    const page = await pdf.getPage(pageNum);
-    const content = await page.getTextContent();
-    const pageText = content.items
-      .map((item: { str?: string }) => item.str ?? '')
-      .join(' ');
-    text += ` ${pageText}`;
-    if (text.length >= STOP_AFTER_CHARS) {
-      break;
-    }
+export type PdfTextResult = {
+  text: string;
+  numPages: number;
+  pagesSampled: number;
+  chars: number;
+  textItems: number;
+};
+
+export async function extractPdfText(buffer: ArrayBuffer): Promise<PdfTextResult> {
+  const loadingTask = (pdfjs as any).getDocument({ data: buffer });
+  const pdf = (await withTimeout(loadingTask.promise, 30000, "PDF load")) as any;
+
+  const numPages = (pdf.numPages as number) || 0;
+  const pagesSampled = Math.min(numPages, 6);
+
+  let text = "";
+  let textItems = 0;
+
+  for (let i = 1; i <= pagesSampled; i++) {
+    const page = (await withTimeout(pdf.getPage(i), 15000, `PDF getPage(${i})`)) as any;
+    const content = (await withTimeout(page.getTextContent(), 15000, `PDF getTextContent(${i})`)) as any;
+    const items = (content.items || []) as any[];
+    textItems += items.length;
+
+    const strings = items
+      .map((item) => (typeof item?.str === "string" ? item.str : ""))
+      .filter(Boolean);
+
+    text += strings.join(" ") + "\n";
+    if (text.length >= 5000) break;
   }
 
-  return text.trim();
+  return { text, numPages, pagesSampled, chars: text.length, textItems };
 }

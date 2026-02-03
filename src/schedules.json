@@ -1,0 +1,114 @@
+{
+  "schedules": [
+    {
+      "id": "Admin_General",
+      "label": "Admin / General",
+      "keywords": [
+        { "term": "correspondence", "weight": 8 },
+        { "term": "engagement letter", "weight": 10 },
+        { "term": "invoice", "weight": 6 }
+      ],
+      "smallTerms": [
+        { "term": "letter", "weight": 2 },
+        { "term": "memo", "weight": 2 }
+      ]
+    },
+    {
+      "id": "A_Real_Estate",
+      "label": "Schedule A - Real Estate",
+      "keywords": [
+        { "term": "real estate", "weight": 10 },
+        { "term": "property", "weight": 6 },
+        { "term": "deed", "weight": 8 },
+        { "term": "mortgage", "weight": 6 }
+      ],
+      "smallTerms": [
+        { "term": "parcel", "weight": 2 },
+        { "term": "address", "weight": 1 }
+      ]
+    },
+    {
+      "id": "B_Stocks_Bonds",
+      "label": "Schedule B - Stocks & Bonds",
+      "keywords": [
+        { "term": "brokerage", "weight": 8 },
+        { "term": "stock", "weight": 6 },
+        { "term": "bond", "weight": 6 },
+        { "term": "security", "weight": 5 }
+      ],
+      "smallTerms": [
+        { "term": "ticker", "weight": 2 },
+        { "term": "share", "weight": 2 }
+      ]
+    },
+    {
+      "id": "C_Cash_Notes",
+      "label": "Schedule C - Cash & Notes",
+      "keywords": [
+        { "term": "bank statement", "weight": 8 },
+        { "term": "checking account", "weight": 8 },
+        { "term": "savings account", "weight": 8 },
+        { "term": "promissory note", "weight": 7 }
+      ],
+      "smallTerms": [
+        { "term": "bank", "weight": 2 },
+        { "term": "cash", "weight": 2 }
+      ]
+    },
+    {
+      "id": "D_Life_Insurance",
+      "label": "Schedule D - Life Insurance",
+      "keywords": [
+        { "term": "life insurance", "weight": 10 },
+        { "term": "policy", "weight": 6 },
+        { "term": "beneficiary", "weight": 6 }
+      ],
+      "smallTerms": [
+        { "term": "premium", "weight": 2 },
+        { "term": "insurer", "weight": 2 }
+      ]
+    },
+    {
+      "id": "E_Joint_Property",
+      "label": "Schedule E - Joint Property",
+      "keywords": [
+        { "term": "joint tenancy", "weight": 10 },
+        { "term": "community property", "weight": 8 },
+        { "term": "tenants in common", "weight": 8 }
+      ],
+      "smallTerms": [
+        { "term": "joint", "weight": 2 },
+        { "term": "co-owner", "weight": 2 }
+      ]
+    },
+    {
+      "id": "F_Other_Property",
+      "label": "Schedule F - Other Property",
+      "keywords": [
+        { "term": "vehicle", "weight": 6 },
+        { "term": "personal property", "weight": 8 },
+        { "term": "art", "weight": 5 },
+        { "term": "jewelry", "weight": 5 }
+      ],
+      "smallTerms": [
+        { "term": "equipment", "weight": 2 },
+        { "term": "furniture", "weight": 2 }
+      ]
+    },
+    {
+      "id": "I_Annuities_Retirement",
+      "label": "Schedule I - Annuities / Retirement",
+      "keywords": [
+        { "term": "retirement account", "weight": 8 },
+        { "term": "annuity", "weight": 8 },
+        { "term": "ira", "weight": 6 },
+        { "term": "401k", "weight": 6 }
+      ],
+      "smallTerms": [
+        { "term": "pension", "weight": 2 },
+        { "term": "rollover", "weight": 2 }
+      ]
+    }
+  ],
+  "filenameRules": []
+}
